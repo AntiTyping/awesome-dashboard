@@ -14,8 +14,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "awesome-dashboard",
-	Short: "A CLI dashboard tool",
+	Use:           "awesome-dashboard",
+	Short:         "A CLI dashboard tool",
+	SilenceErrors: true,
 }
 
 func defaultDBPath() string {

@@ -48,6 +48,8 @@ func Open(dbPath string) (*Store, error) {
 	}
 	// A single connection keeps ":memory:" databases consistent and serializes writes.
 	db.SetMaxOpenConns(1)
+	db.Exec("PRAGMA busy_timeout = 5000")
+	db.Exec("PRAGMA journal_mode = WAL")
 	if _, err := db.Exec(schema); err != nil {
 		db.Close()
 		return nil, fmt.Errorf("create schema: %w", err)
