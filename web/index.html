@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Awesome Dashboard</title>
+<style>
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --header-bg: #ffffff;
+  --text: #1a1d21;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111317;
+    --surface: #1c1f26;
+    --header-bg: #1c1f26;
+    --text: #f1f3f5;
+    --text-muted: #9aa3af;
+    --border: #2b2f38;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+header {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+}
+header h1 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+main { padding: 24px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: var(--surface);
+  border-left: 5px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+}
+.title { font-weight: 700; font-size: 1.05rem; }
+.subtitle { color: var(--text-muted); margin-top: 4px; font-size: 0.9rem; }
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 64px 0;
+}
+</style>
+</head>
+<body>
+<header><h1>Awesome Dashboard</h1></header>
+<main><div class="grid" id="grid"></div></main>
+<script>
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s == null ? '' : String(s);
+  return d.innerHTML;
+}
+
+function render(items) {
+  var grid = document.getElementById('grid');
+  if (!items || items.length === 0) {
+    grid.innerHTML = '<div class="empty">No items yet. Use the CLI to add one.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(function (item) {
+    return '<div class="card" style="border-left-color: ' + esc(item.color) + '">' +
+      '<div class="title">' + esc(item.title) + '</div>' +
+      '<div class="subtitle">' + esc(item.subtitle) + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function fetchItems() {
+  return fetch('/api/items')
+    .then(function (r) { return r.json(); })
+    .then(render)
+    .catch(function (e) { console.error('fetch items failed', e); });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  fetchItems();
+  var es = new EventSource('/api/events');
+  es.addEventListener('message', fetchItems);
+});
+</script>
+</body>
+</html>
