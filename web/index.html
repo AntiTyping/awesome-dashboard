@@ -53,6 +53,8 @@ main { padding: 24px; }
 }
 .title { font-weight: 700; font-size: 1.05rem; }
 .subtitle { color: var(--text-muted); margin-top: 4px; font-size: 0.9rem; }
+.card { cursor: pointer; transition: opacity 0.15s; }
+.card:hover { opacity: 0.7; }
 .empty {
   grid-column: 1 / -1;
   text-align: center;
@@ -78,11 +80,16 @@ function render(items) {
     return;
   }
   grid.innerHTML = items.map(function (item) {
-    return '<div class="card" style="border-left-color: ' + esc(item.color) + '">' +
+    return '<div class="card" data-id="' + esc(item.id) + '" style="border-left-color: ' + esc(item.color) + '">' +
       '<div class="title">' + esc(item.title) + '</div>' +
       '<div class="subtitle">' + esc(item.subtitle) + '</div>' +
       '</div>';
   }).join('');
+  grid.querySelectorAll('.card[data-id]').forEach(function (card) {
+    card.addEventListener('click', function () {
+      fetch('/api/items/' + encodeURIComponent(card.dataset.id), { method: 'DELETE' });
+    });
+  });
 }
 
 function fetchItems() {
