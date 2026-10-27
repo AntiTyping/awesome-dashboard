@@ -54,6 +54,7 @@ func New(st *store.Store) *Server {
 
 func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/items", s.handleItems)
+	mux.HandleFunc("DELETE /api/items/{id}", s.handleDeleteItem)
 	mux.HandleFunc("GET /api/events", s.handleEvents)
 	mux.HandleFunc("POST /api/notify", s.handleNotify)
 }
@@ -66,6 +67,16 @@ func (s *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(items)
+}
+
+func (s *Server) handleDeleteItem(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if err := s.store.Delete(id); err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	s.broker.broadcast()
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *Server) handleEvents(w http.ResponseWriter, r *http.Request) {
